@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Netflix Clone - Stranger Things</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+      <div class="navbar-brand">
+        <a href="#" class="logo">NETFLIX</a>
+      </div>
+      <div class="navbar-nav">
+        <a href="#" class="nav-link active">Home</a>
+        <a href="#" class="nav-link">TV Shows</a>
+        <a href="#" class="nav-link">Movies</a>
+        <a href="#" class="nav-link">New & Popular</a>
+        <a href="#" class="nav-link">My Lists</a>
+      </div>
+      <div class="navbar-right">
+        <i
+          class="fas fa-search"
+          tabindex="0"
+          aria-label="Search"
+          role="button"
+        ></i>
+        <i
+          class="fas fa-bell"
+          tabindex="0"
+          aria-label="Notifications"
+          role="button"
+        ></i>
+        <div class="profile-icon" tabindex="0">U</div>
+        <button class="mobile-menu-btn" aria-label="Open menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">STRANGER THINGS</h1>
+        <p class="hero-description">
+          When a young boy vanishes, a small town uncovers a mystery involving
+          secret experiments, terrifying supernatural forces and one strange
+          little girl. Experience the ultimate 80s sci-fi horror adventure.
+        </p>
+        <div class="hero-button">
+          <button class="btn btn-play" aria-label="Play Stranger Things">
+            <i class="fa fa-play"></i>Play
+          </button>
+          <button
+            class="btn btn-more-info"
+            aria-label="More information about Stranger Things"
+          >
+            <i class="fa fa-info-circle"></i>More Info
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Sections -->
+    <main>
+      <!-- Trending Now -->
+      <div class="container">
+        <section class="content-section">
+          <h2 class="section-title">Trending Now</h2>
+          <div class="content-row" role="list">
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="The Crown"
+            >
+              <img
+                src="https://m.media-amazon.com/images/I/81xFn+Uvr+L._AC_UF1000,1000_QL80_DpWeblab_.jpg"
+                alt="The Crown"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">The Crown</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">TV-MA</div>
+                    <div class="info-badge">Drama</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="Wednesday"
+            >
+              <img
+                src="https://www.themoviedb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg"
+                alt="Wednesday"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">Wednesday</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">TV-14</div>
+                    <div class="info-badge">Comedy</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="Money Heist"
+            >
+              <img
+                src="https://www.themoviedb.org/t/p/w500/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg"
+                alt="Money Heist"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">Money Heist</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">TV-MA</div>
+                    <div class="info-badge">Thriller</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="Squid Game"
+            >
+              <img
+                src="https://www.themoviedb.org/t/p/w500/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg"
+                alt="Squid Game"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">Squid Game</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">TV-MA</div>
+                    <div class="info-badge">Thriller</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="Dark"
+            >
+              <img
+                src="https://resizing.flixster.com/lpJkDxnEFNQT1OWJjnmYfvpAHJ0=/ems.cHJkLWVtcy1hc3NldHMvdHZzZXJpZXMvUlRUVjI2NjgyOS53ZWJw"
+                alt="Dark"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">Dark</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">TV-MA</div>
+                    <div class="info-badge">Sci-Fi</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="The Witcher"
+            >
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw1-y3CidOjAoN7M9N5aioBr3V0l_3fTjGqg&s"
+                alt="The Witcher"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">The Witcher</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">TV-MA</div>
+                    <div class="info-badge">Fantasy</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Popular on Netflix -->
+      <div class="container">
+        <section class="content-section">
+          <h2 class="section-title">Popular on Netflix</h2>
+          <div class="content-row" role="list">
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="Red Notice"
+            >
+              <img
+                src="https://www.themoviedb.org/t/p/w500/lAXONuqg41NwUMuzMiFvicDET9Y.jpg"
+                alt="Red Notice"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">Red Notice</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">PG-13</div>
+                    <div class="info-badge">Action</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="Extraction 2"
+            >
+              <img
+                src="https://www.themoviedb.org/t/p/w500/7gKI9hpEMcZUQpNgKrkDzJpbnNS.jpg"
+                alt="Extraction 2"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">Extraction 2</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">R</div>
+                    <div class="info-badge">Action</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="content-card"
+              tabindex="0"
+              role="listitem"
+              aria-label="Glass Onion"
+            >
+              <img
+                src="https://www.themoviedb.org/t/p/w500/vDGr1YdrlfbU9wxTOdpf3zChmv9.jpg"
+                alt="Glass Onion"
+              />
+              <div class="netflix-badge">N</div>
+              <div class="card-overlay">
+                <div class="overlay-bottom">
+                  <div class="overlay-title">Glass Onion</div>
+                  <div class="overlay-controls">
+                    <div class="control-btn play-btn" aria-label="Play"></div>
+                    <div
+                      class="control-btn check-btn"
+                      aria-label="Add to list"
+                    ></div>
+                    <div class="control-btn thumbs-btn" aria-label="Like"></div>
+                    <div
+                      class="control-btn more-btn"
+                      aria-label="More options"
+                    ></div>
+                  </div>
+                  <div class="overlay-info">
+                    <div class="info-badge">PG-13</div>
+                    <div class="info-badge">Mystery</div>
+                    <div class="info-badge">4K</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

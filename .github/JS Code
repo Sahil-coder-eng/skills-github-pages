@@ -1,0 +1,840 @@
+const express = require("express");
+const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs").promises;
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || "netflix_clone_secret_key_2024";
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static("public"));
+
+// File upload configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      Date.now() +
+        "-" +
+        Math.round(Math.random() * 1e9) +
+        path.extname(file.originalname)
+    );
+  },
+});
+const upload = multer({ storage: storage });
+
+// In-memory database (replace with real database in production)
+let users = [
+  {
+    id: 1,
+    username: "testuser",
+    email: "test@netflix.com",
+    password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
+    profile: {
+      name: "Test User",
+      avatar: "https://via.placeholder.com/150x150/e50914/ffffff?text=TU",
+      watchlist: [1, 3, 5],
+      favorites: [2, 4],
+      watchHistory: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    },
+    isAdmin: false,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+let content = [
+  {
+    id: 1,
+    title: "The Crown",
+    description:
+      "Follows the political rivalries and romance of Queen Elizabeth II's reign and the events that shaped the second half of the twentieth century.",
+    type: "series",
+    genre: ["Drama", "Biography", "History"],
+    rating: "TV-MA",
+    year: 2016,
+    seasons: 6,
+    episodes: 60,
+    duration: 60,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/1M876KQUuMllNr7sEsTjfrMUen6.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/wHa6KOJAoNTFLFtp7wguUJKSnju.jpg",
+    trailer: "https://www.youtube.com/watch?v=JWtnJjn6ng0",
+    cast: ["Claire Foy", "Olivia Colman", "Imelda Staunton", "Matt Smith"],
+    director: "Peter Morgan",
+    isNetflixOriginal: true,
+    featured: true,
+    trending: true,
+    popular: false,
+    releaseDate: "2016-11-04",
+    languages: ["English"],
+    subtitles: ["English", "Spanish", "French", "German"],
+    quality: "4K",
+    imdbRating: 8.7,
+    tags: ["Royal Family", "Politics", "Drama", "Historical"],
+  },
+  {
+    id: 2,
+    title: "Wednesday",
+    description:
+      "Smart, sarcastic and a little dead inside, Wednesday Addams investigates a murder spree while making new friends — and foes — at Nevermore Academy.",
+    type: "series",
+    genre: ["Comedy", "Crime", "Family"],
+    rating: "TV-14",
+    year: 2022,
+    seasons: 1,
+    episodes: 8,
+    duration: 45,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/iHSwvRVsRyxpX7FE7GbviaDvgGZ.jpg",
+    trailer: "https://www.youtube.com/watch?v=Di310WS8zLk",
+    cast: [
+      "Jenna Ortega",
+      "Catherine Zeta-Jones",
+      "Luis Guzmán",
+      "Isaac Ordonez",
+    ],
+    director: "Tim Burton",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: true,
+    popular: true,
+    releaseDate: "2022-11-23",
+    languages: ["English"],
+    subtitles: ["English", "Spanish", "French", "German", "Portuguese"],
+    quality: "4K",
+    imdbRating: 8.1,
+    tags: ["Supernatural", "School", "Mystery", "Dark Comedy"],
+  },
+  {
+    id: 3,
+    title: "Money Heist",
+    description:
+      "An unusual group of robbers attempt to carry out the most perfect robbery in Spanish history - stealing 2.4 billion euros from the Royal Mint of Spain.",
+    type: "series",
+    genre: ["Action", "Crime", "Drama"],
+    rating: "TV-MA",
+    year: 2017,
+    seasons: 5,
+    episodes: 41,
+    duration: 70,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/xGexTKCJDkl12dTW4YCBDXWb1AD.jpg",
+    trailer: "https://www.youtube.com/watch?v=_InqQJRqGW4",
+    cast: ["Álvaro Morte", "Úrsula Corberó", "Itziar Ituño", "Pedro Alonso"],
+    director: "Álex Pina",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: true,
+    popular: true,
+    releaseDate: "2017-05-02",
+    languages: ["Spanish", "English"],
+    subtitles: [
+      "English",
+      "Spanish",
+      "French",
+      "German",
+      "Portuguese",
+      "Italian",
+    ],
+    quality: "4K",
+    imdbRating: 8.2,
+    tags: ["Heist", "Spain", "Robbery", "Thriller"],
+  },
+  {
+    id: 4,
+    title: "Squid Game",
+    description:
+      "Hundreds of cash-strapped players accept a strange invitation to compete in children's games for a tempting prize, but the stakes are deadly.",
+    type: "series",
+    genre: ["Action", "Drama", "Mystery"],
+    rating: "TV-MA",
+    year: 2021,
+    seasons: 1,
+    episodes: 9,
+    duration: 60,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/qw3J9cNeLioOLoR68WX7z79aCdK.jpg",
+    trailer: "https://www.youtube.com/watch?v=oqxAJKy0ii4",
+    cast: ["Lee Jung-jae", "Park Hae-soo", "Wi Ha-joon", "HoYeon Jung"],
+    director: "Hwang Dong-hyuk",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: true,
+    popular: true,
+    releaseDate: "2021-09-17",
+    languages: ["Korean", "English"],
+    subtitles: [
+      "English",
+      "Spanish",
+      "French",
+      "German",
+      "Portuguese",
+      "Korean",
+    ],
+    quality: "4K",
+    imdbRating: 8.0,
+    tags: ["Survival", "Korea", "Game", "Psychological"],
+  },
+  {
+    id: 5,
+    title: "Dark",
+    description:
+      "A family saga with a supernatural twist, set in a German town where the disappearance of two young children exposes the relationships among four families.",
+    type: "series",
+    genre: ["Crime", "Drama", "Mystery"],
+    rating: "TV-MA",
+    year: 2017,
+    seasons: 3,
+    episodes: 26,
+    duration: 60,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/5Kep6nF2hw6VCu6wtmSnKkLUmWI.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/93vA0C8lT3lOw8dixODr6F6nV6s.jpg",
+    trailer: "https://www.youtube.com/watch?v=rrwycJ08PSA",
+    cast: ["Louis Hofmann", "Maja Schöne", "Lisa Vicari", "Oliver Masucci"],
+    director: "Baran bo Odar",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: true,
+    popular: false,
+    releaseDate: "2017-12-01",
+    languages: ["German", "English"],
+    subtitles: ["English", "Spanish", "French", "German", "Portuguese"],
+    quality: "4K",
+    imdbRating: 8.7,
+    tags: ["Time Travel", "Germany", "Sci-Fi", "Mystery"],
+  },
+  {
+    id: 6,
+    title: "The Witcher",
+    description:
+      "Geralt of Rivia, a mutated monster-hunter for hire, journeys toward his destiny in a turbulent world where people often prove more wicked than beasts.",
+    type: "series",
+    genre: ["Action", "Adventure", "Drama"],
+    rating: "TV-MA",
+    year: 2019,
+    seasons: 3,
+    episodes: 24,
+    duration: 60,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/cZ0d3rtvXPVvuiX22sP79K3Hmjz.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/wmU0QQy4w5kn8dGleBtNXK5G0qg.jpg",
+    trailer: "https://www.youtube.com/watch?v=ndl1W4ltcmg",
+    cast: ["Henry Cavill", "Anya Chalotra", "Freya Allan", "Joey Batey"],
+    director: "Lauren Schmidt Hissrich",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: true,
+    popular: true,
+    releaseDate: "2019-12-20",
+    languages: ["English"],
+    subtitles: ["English", "Spanish", "French", "German", "Portuguese"],
+    quality: "4K",
+    imdbRating: 8.2,
+    tags: ["Fantasy", "Magic", "Adventure", "Medieval"],
+  },
+  {
+    id: 7,
+    title: "Red Notice",
+    description:
+      "An Interpol agent tracks the world's most wanted art thief in this action-comedy caper starring Dwayne Johnson, Ryan Reynolds and Gal Gadot.",
+    type: "movie",
+    genre: ["Action", "Comedy", "Thriller"],
+    rating: "PG-13",
+    year: 2021,
+    duration: 118,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/lAXONuqg41NwUMuzMiFvicDET9Y.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/vfuzELmhBjBTswB6Vktje04cK6f.jpg",
+    trailer: "https://www.youtube.com/watch?v=Pj0wz7zu3Ms",
+    cast: ["Dwayne Johnson", "Ryan Reynolds", "Gal Gadot", "Ritu Arya"],
+    director: "Rawson Marshall Thurber",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: false,
+    popular: true,
+    releaseDate: "2021-11-12",
+    languages: ["English"],
+    subtitles: ["English", "Spanish", "French", "German", "Portuguese"],
+    quality: "4K",
+    imdbRating: 6.3,
+    tags: ["Heist", "Action", "Comedy", "Art Theft"],
+  },
+  {
+    id: 8,
+    title: "Extraction 2",
+    description:
+      "Back from the brink of death, highly skilled commando Tyler Rake takes on another dangerous mission: saving the imprisoned family of a ruthless gangster.",
+    type: "movie",
+    genre: ["Action", "Thriller"],
+    rating: "R",
+    year: 2023,
+    duration: 123,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/7gKI9hpEMcZUQpNgKrkDzJpbnNS.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/8rpDcsfLJypbO6vREc0547VKqEv.jpg",
+    trailer: "https://www.youtube.com/watch?v=Y274jZs5s7s",
+    cast: [
+      "Chris Hemsworth",
+      "Golshifteh Farahani",
+      "Adam Bessa",
+      "Olga Kurylenko",
+    ],
+    director: "Sam Hargrave",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: false,
+    popular: true,
+    releaseDate: "2023-06-16",
+    languages: ["English"],
+    subtitles: ["English", "Spanish", "French", "German", "Portuguese"],
+    quality: "4K",
+    imdbRating: 7.0,
+    tags: ["Action", "Mercenary", "Rescue", "Prison"],
+  },
+  {
+    id: 9,
+    title: "Glass Onion: A Knives Out Mystery",
+    description:
+      "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island, where a murder mystery unfolds.",
+    type: "movie",
+    genre: ["Comedy", "Crime", "Drama"],
+    rating: "PG-13",
+    year: 2022,
+    duration: 139,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/vDGr1YdrlfbU9wxTOdpf3zChmv9.jpg",
+    backdrop:
+      "https://www.themoviedb.org/t/p/original/2Df50XkRCPVVCpCcJMUP5TFOAoB.jpg",
+    trailer: "https://www.youtube.com/watch?v=gGC2vZlk4xc",
+    cast: ["Daniel Craig", "Edward Norton", "Janelle Monáe", "Kathryn Hahn"],
+    director: "Rian Johnson",
+    isNetflixOriginal: true,
+    featured: false,
+    trending: false,
+    popular: true,
+    releaseDate: "2022-12-23",
+    languages: ["English"],
+    subtitles: ["English", "Spanish", "French", "German", "Portuguese"],
+    quality: "4K",
+    imdbRating: 7.1,
+    tags: ["Mystery", "Detective", "Whodunit", "Greece"],
+  },
+  {
+    id: 10,
+    title: "Stranger Things",
+    description:
+      "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.",
+    type: "series",
+    genre: ["Drama", "Fantasy", "Horror"],
+    rating: "TV-14",
+    year: 2016,
+    seasons: 4,
+    episodes: 42,
+    duration: 50,
+    thumbnail:
+      "https://www.themoviedb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+    backdrop: "https://wallpapercave.com/wp/wp4056410.jpg",
+    trailer: "https://www.youtube.com/watch?v=b9EkMc79ZSU",
+    cast: [
+      "Millie Bobby Brown",
+      "Finn Wolfhard",
+      "Winona Ryder",
+      "David Harbour",
+    ],
+    director: "The Duffer Brothers",
+    isNetflixOriginal: true,
+    featured: true,
+    trending: true,
+    popular: true,
+    releaseDate: "2016-07-15",
+    languages: ["English"],
+    subtitles: ["English", "Spanish", "French", "German", "Portuguese"],
+    quality: "4K",
+    imdbRating: 8.7,
+    tags: ["80s", "Supernatural", "Kids", "Horror", "Sci-Fi"],
+  },
+];
+
+// Authentication Middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Access token required" });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Invalid or expired token" });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// Admin Middleware
+const requireAdmin = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+  next();
+};
+
+// Helper function to generate user ID
+const generateUserId = () => {
+  return users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+};
+
+// Helper function to generate content ID
+const generateContentId = () => {
+  return content.length > 0 ? Math.max(...content.map((c) => c.id)) + 1 : 1;
+};
+
+// Routes
+
+// Health Check
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: "1.0.0",
+  });
+});
+
+// Authentication Routes
+
+// Register
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const { username, email, password, name } = req.body;
+
+    // Validation
+    if (!username || !email || !password || !name) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
+    }
+
+    // Check if user exists
+    const existingUser = users.find(
+      (u) => u.email === email || u.username === username
+    );
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const user = {
+      id: generateUserId(),
+      username,
+      email,
+      password: hashedPassword,
+      profile: {
+        name,
+        avatar: `https://via.placeholder.com/150x150/e50914/ffffff?text=${name
+          .charAt(0)
+          .toUpperCase()}`,
+        watchlist: [],
+        favorites: [],
+        watchHistory: [],
+      },
+      isAdmin: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    users.push(user);
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: user.id, username: user.username, isAdmin: user.isAdmin },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+    res.status(201).json({ user: userWithoutPassword, token });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Login
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Find user
+    const user = users.find((u) => u.email === email);
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Check password
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: user.id, username: user.username, isAdmin: user.isAdmin },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+    res.json({ user: userWithoutPassword, token });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get current user
+app.get("/api/auth/me", authenticateToken, (req, res) => {
+  const user = users.find((u) => u.id === req.user.userId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const { password: _, ...userWithoutPassword } = user;
+  res.json({ user: userWithoutPassword });
+});
+
+// Content Routes
+
+// Get all content with filters
+app.get("/api/content", (req, res) => {
+  try {
+    const {
+      type,
+      genre,
+      featured,
+      trending,
+      popular,
+      search,
+      limit = 20,
+      offset = 0,
+      sortBy = "releaseDate",
+      sortOrder = "desc",
+    } = req.query;
+
+    let filteredContent = [...content];
+
+    // Apply filters
+    if (type) {
+      filteredContent = filteredContent.filter((item) => item.type === type);
+    }
+
+    if (genre) {
+      filteredContent = filteredContent.filter((item) =>
+        item.genre.some((g) => g.toLowerCase().includes(genre.toLowerCase()))
+      );
+    }
+
+    if (featured === "true") {
+      filteredContent = filteredContent.filter((item) => item.featured);
+    }
+
+    if (trending === "true") {
+      filteredContent = filteredContent.filter((item) => item.trending);
+    }
+
+    if (popular === "true") {
+      filteredContent = filteredContent.filter((item) => item.popular);
+    }
+
+    if (search) {
+      const searchTerm = search.toLowerCase();
+      filteredContent = filteredContent.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchTerm) ||
+          item.description.toLowerCase().includes(searchTerm) ||
+          item.cast.some((actor) => actor.toLowerCase().includes(searchTerm)) ||
+          item.tags.some((tag) => tag.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    // Sort content
+    filteredContent.sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+
+      if (sortBy === "releaseDate") {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      }
+
+      if (sortOrder === "desc") {
+        return bValue > aValue ? 1 : -1;
+      } else {
+        return aValue > bValue ? 1 : -1;
+      }
+    });
+
+    // Apply pagination
+    const total = filteredContent.length;
+    const paginatedContent = filteredContent.slice(
+      parseInt(offset),
+      parseInt(offset) + parseInt(limit)
+    );
+
+    res.json({
+      content: paginatedContent,
+      pagination: {
+        total,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        hasNext: parseInt(offset) + parseInt(limit) < total,
+        hasPrev: parseInt(offset) > 0,
+      },
+    });
+  } catch (error) {
+    console.error("Get content error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get content by ID
+app.get("/api/content/:id", (req, res) => {
+  const contentId = parseInt(req.params.id);
+  const contentItem = content.find((item) => item.id === contentId);
+
+  if (!contentItem) {
+    return res.status(404).json({ error: "Content not found" });
+  }
+
+  res.json({ content: contentItem });
+});
+
+// Get featured content
+app.get("/api/content/featured/hero", (req, res) => {
+  const featuredContent = content.find(
+    (item) => item.featured && item.title === "Stranger Things"
+  );
+
+  if (!featuredContent) {
+    return res.json({
+      content: content.find((item) => item.featured) || content[0],
+    });
+  }
+
+  res.json({ content: featuredContent });
+});
+
+// Get trending content
+app.get("/api/content/section/trending", (req, res) => {
+  const trendingContent = content.filter((item) => item.trending);
+  res.json({ content: trendingContent });
+});
+
+// Get popular content
+app.get("/api/content/section/popular", (req, res) => {
+  const popularContent = content.filter((item) => item.popular);
+  res.json({ content: popularContent });
+});
+
+// Get content by genre
+app.get("/api/content/genre/:genre", (req, res) => {
+  const genre = req.params.genre;
+  const genreContent = content.filter((item) =>
+    item.genre.some((g) => g.toLowerCase() === genre.toLowerCase())
+  );
+  res.json({ content: genreContent });
+});
+
+// User Profile Routes
+
+// Update user profile
+app.put(
+  "/api/user/profile",
+  authenticateToken,
+  upload.single("avatar"),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const { name } = req.body;
+
+      const userIndex = users.findIndex((u) => u.id === userId);
+      if (userIndex === -1) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const user = users[userIndex];
+
+      // Update profile
+      if (name) user.profile.name = name;
+      if (req.file) {
+        user.profile.avatar = `/uploads/${req.file.filename}`;
+      }
+
+      users[userIndex] = user;
+
+      const { password: _, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+// Watchlist Routes
+
+// Get user's watchlist
+app.get("/api/user/watchlist", authenticateToken, (req, res) => {
+  const user = users.find((u) => u.id === req.user.userId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const watchlistContent = content.filter((item) =>
+    user.profile.watchlist.includes(item.id)
+  );
+
+  res.json({ watchlist: watchlistContent });
+});
+
+// Add to watchlist
+app.post("/api/user/watchlist/:contentId", authenticateToken, (req, res) => {
+  const contentId = parseInt(req.params.contentId);
+  const userId = req.user.userId;
+
+  const userIndex = users.findIndex((u) => u.id === userId);
+  if (userIndex === -1) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const contentExists = content.find((item) => item.id === contentId);
+  if (!contentExists) {
+    return res.status(404).json({ error: "Content not found" });
+  }
+
+  const user = users[userIndex];
+  if (!user.profile.watchlist.includes(contentId)) {
+    user.profile.watchlist.push(contentId);
+    users[userIndex] = user;
+  }
+
+  res.json({
+    message: "Added to watchlist",
+    watchlist: user.profile.watchlist,
+  });
+});
+
+// Remove from watchlist
+app.delete("/api/user/watchlist/:contentId", authenticateToken, (req, res) => {
+  const contentId = parseInt(req.params.contentId);
+  const userId = req.user.userId;
+
+  const userIndex = users.findIndex((u) => u.id === userId);
+  if (userIndex === -1) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const user = users[userIndex];
+  user.profile.watchlist = user.profile.watchlist.filter(
+    (id) => id !== contentId
+  );
+  users[userIndex] = user;
+
+  res.json({
+    message: "Removed from watchlist",
+    watchlist: user.profile.watchlist,
+  });
+});
+
+// Favorites Routes
+
+// Get user's favorites
+app.get("/api/user/favorites", authenticateToken, (req, res) => {
+  const user = users.find((u) => u.id === req.user.userId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const favoritesContent = content.filter((item) =>
+    user.profile.favorites.includes(item.id)
+  );
+
+  res.json({ favorites: favoritesContent });
+});
+
+// Add to favorites
+app.post("/api/user/favorites/:contentId", authenticateToken, (req, res) => {
+  const contentId = parseInt(req.params.contentId);
+  const userId = req.user.userId;
+
+  const userIndex = users.findIndex((u) => u.id === userId);
+  if (userIndex === -1) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const contentExists = content.find((item) => item.id === contentId);
+  if (!contentExists) {
+    return res.status(404).json({ error: "Content not found" });
+  }
+
+  const user = users[userIndex];
+  if (!user.profile.favorites.includes(contentId)) {
+    user.profile.favorites.push(contentId);
+    users[userIndex] = user;
+  }
+
+  res.json({
+    message: "Added to favorites",
+    favorites: user.profile.favorites,
+  });
+});
+
+//
+app.post("/api/login", (req, res) => {
+  const { username } = req.body;
+  const user = users.find((u) => u.username === username);
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  const token = jwt.sign({ userId: user.id }, SECRET_KEY);
+  res.json({ token });
+});
+
+// 🚀 Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
